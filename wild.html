@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fire Weather Image</title>
+    <title>Dynamic Image Embedding</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
         img {
             width: 100%;
-            height: 100%;
+            height: auto;
         }
     </style>
 </head>
 <body>
-    <img src="https://fireweather.fdacs.gov/wx/images/KBDI-countymeans-d10.png" alt="Fire Weather Image">
+    <div id="image-container"></div>
+    <script>
+        const imageUrl = 'https://fireweather.fdacs.gov/wx/images/KBDI-countymeans-d10.png';
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = 'Fire Weather KBDI County Means';
+        document.getElementById('image-container').appendChild(img);
+    </script>
 </body>
 </html>
