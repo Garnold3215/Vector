@@ -1,24 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Image Embedding</title>
-    <style>
-        img {
-            width: 100%;
-            height: auto;
-        }
-    </style>
-</head>
-<body>
-    <div id="image-container"></div>
-    <script>
-        const imageUrl = 'https://fireweather.fdacs.gov/wx/images/KBDI-countymeans-d10.png';
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = 'Fire Weather KBDI County Means';
-        document.getElementById('image-container').appendChild(img);
-    </script>
-</body>
-</html>
+<object data="https://fireweather.fdacs.gov/wx/images/KBDI-countymeans-d10.png" width="100%" height="100%">
+    <p>Your browser does not support displaying this image directly. Please use a compatible browser.</p>
+</object>
