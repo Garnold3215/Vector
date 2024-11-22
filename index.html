@@ -4,7 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bulletin Board</title>
-    <!-- You can include additional CSS styles or links here -->
+    <style>
+        /* MacBook Dock scroll effect */
+        a img:hover {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+        }
+        a img {
+            transition: transform 0.3s ease;
+        }
+
+        /* Shake effect for arrows */
+        .shake:hover {
+            animation: shake 0.3s;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
 </head>
 <body>
     <!-- Background Image Container -->
@@ -23,6 +46,7 @@
             </a>
         </div>
 
+        <!-- Links with MacBook Dock Scroll Effect -->
         <!-- PHYSICAL FITNESS with Tooltip -->
         <a href="https://app.targetsolutions.com/tsapp/dashboard/pl_fb/index.cfm?fuseaction=c_pro_assignments.showRcaSelectUsers&courseIDList=47938" target="_top">
             <img style="position: absolute; top: 155px; left: 36px; width: 189px; height: 24px;" title="Physical Fitness" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/982851D1-BB36-503C-EE59-43F5A3BE1DED.png" alt="Physical Fitness">
@@ -45,7 +69,7 @@
 
         <!-- BGL MONDAYS -->
         <a href="https://1drv.ms/x/c/e943a2e40708e21e/EeBxn2sJhqBLs0RwwSIr18kBwAJzbrbvC6t12iggcI2tdg?e=MZ2v5Q" target="_blank" rel="noopener">
-            <img style="position: absolute; top: 275px; left: 37px; width: 147px; height: 24px;" title="BGL Mondays" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/A7981197-EA94-3CD3-92E9-5138C2D4D728.png" alt="BGL Mondays">
+             <img style="position: absolute; top: 275px; left: 37px; width: 147px; height: 24px;" title="BGL Mondays" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/A7981197-EA94-3CD3-92E9-5138C2D4D728.png" alt="BGL Mondays">
         </a>
 
         <!-- COMPANY TRAINING -->
@@ -98,30 +122,6 @@
             <img style="position: absolute; top: 785px; left: 36px; width: 360px; height: 24px;" title="Small Equipment Repair Request" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/A2A1E29F-658D-5653-52DD-D045EF12B504.png" alt="Small Equipment Repair Request">
         </a>
 
-        <!-- YOUTUBE LINK -->
-        <div class="video-carousel" style="position: absolute; top: 920px; left: 12px;">
-            <!-- Controls with custom arrows and centered text -->
-            <div class="controls" style="position: relative; width: 395px; height: 30px; display: flex; justify-content: center; align-items: center; top: -35px;">
-                <!-- Custom left arrow image -->
-                <button id="prevBtn" style="background: none; border: none; cursor: pointer; padding: 0 10px;">
-                    <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/777D4B81-C29D-C906-AC86-F16E4F03CE36.png" alt="Previous" style="width: 50px; height: 30px;">
-                </button>
-
-                <!-- Image in between the arrows -->
-                <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/CAA4DB3C-86CD-ABDC-0B58-20634957127D.png" alt="Scroll" style="height: 30px;">
-
-                <!-- Custom right arrow image -->
-                <button id="nextBtn" style="background: none; border: none; cursor: pointer; padding: 0 10px;">
-                    <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/A79DFC11-1CED-7682-028F-B57064C4A9E0.png" alt="Next" style="width: 50px; height: 30px;">
-                </button>
-            </div>
-
-            <!-- Video iframe moved up by 15px -->
-            <div class="video-wrapper" style="position: relative;">
-                <iframe id="ytplayer" width="395" height="222.1875" src="" frameborder="0" allowfullscreen="allowfullscreen" style="transform: translateY(-30px);"></iframe>
-            </div>
-        </div>
-
         <!-- PEER SUPPORT -->
         <a href="https://s3.amazonaws.com/tsresources.targetsolutions.com/D4898E15-FA6F-356B-6EC4-FBCA63906713.png" target="_blank" rel="noopener">
             <img style="position: absolute; top: 1210px; left: 36px; width: 249px; height: 24px;" title="Peer Support" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/5F9B53FE-FE22-E33D-2363-3B316C1FCD1A.png" alt="Peer Support">
@@ -151,6 +151,30 @@
         <a href="https://centrality.ci.palm-coast.fl.us/employeedashboard/home/fire" target="_blank" rel="noopener">
             <img style="position: absolute; top: 1450px; left: 36px; width: 354px; height: 24px;" title="SOP Standard Operating Guidelines" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/16370B4B-4E05-88D0-F6BD-193941311EBD.png" alt="SOP Standard Operating Guidelines">
         </a>
+
+        <!-- YOUTUBE LINK -->
+        <div class="video-carousel" style="position: absolute; top: 920px; left: 12px;">
+            <!-- Controls with custom arrows and centered text -->
+            <div class="controls" style="position: relative; width: 395px; height: 30px; display: flex; justify-content: center; align-items: center; top: -35px;">
+                <!-- Custom left arrow image with shake effect -->
+                <button id="prevBtn" class="shake" style="background: none; border: none; cursor: pointer; padding: 0 10px;">
+                    <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/777D4B81-C29D-C906-AC86-F16E4F03CE36.png" alt="Previous" style="width: 50px; height: 30px;">
+                </button>
+
+                <!-- Image in between the arrows -->
+                <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/CAA4DB3C-86CD-ABDC-0B58-20634957127D.png" alt="Scroll" style="height: 30px;">
+
+                <!-- Custom right arrow image with shake effect -->
+                <button id="nextBtn" class="shake" style="background: none; border: none; cursor: pointer; padding: 0 10px;">
+                    <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/A79DFC11-1CED-7682-028F-B57064C4A9E0.png" alt="Next" style="width: 50px; height: 30px;">
+                </button>
+            </div>
+
+            <!-- Video iframe moved up by 15px -->
+            <div class="video-wrapper" style="position: relative;">
+                <iframe id="ytplayer" width="395" height="222.1875" src="" frameborder="0" allowfullscreen="allowfullscreen" style="transform: translateY(-30px);"></iframe>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript placed before the closing body tag -->
