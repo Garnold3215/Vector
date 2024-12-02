@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bulletin Board</title>
     <style>
+        /* MacBook Dock scroll effect */
+        a img:not(.no-effect):hover {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+        }
+        a img:not(.no-effect) {
+            transition: transform 0.3s ease;
+        }
+
         /* Shake effect for arrows */
         .shake:hover {
             animation: shake 0.3s;
@@ -26,18 +35,18 @@
         <!-- Main Tab positioned individually -->
         <div style="position: absolute; top: 10px; left: 13px;">
             <a href="index.html">
-                <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/68B39CC3-1F0B-B7D2-2CEF-5E594C07A390.png" alt="Main Page" style="width: 105px; height: 35px;">
+                <img class="no-effect" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/68B39CC3-1F0B-B7D2-2CEF-5E594C07A390.png" alt="Main Page" style="width: 105px; height: 35px;">
             </a>
         </div>
 
         <!-- Chief Tab positioned individually -->
         <div style="position: absolute; top: 10px; left: 120px;">
             <a href="chief.html">
-                <img src="https://s3.amazonaws.com/tsresources.targetsolutions.com/2C8B723D-FE26-81DA-67A1-2B69283F22B5.png" alt="Chief Page" style="width: 190px; height: 35px;">
+                <img class="no-effect" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/2C8B723D-FE26-81DA-67A1-2B69283F22B5.png" alt="Chief Page" style="width: 190px; height: 35px;">
             </a>
         </div>
 
-        <!-- Links without MacBook Dock Scroll Effect -->
+        <!-- Links with MacBook Dock Scroll Effect -->
         <!-- PHYSICAL FITNESS with Tooltip -->
         <a href="https://app.targetsolutions.com/tsapp/dashboard/pl_fb/index.cfm?fuseaction=c_pro_assignments.showRcaSelectUsers&courseIDList=47938" target="_top">
             <img style="position: absolute; top: 155px; left: 36px; width: 189px; height: 24px;" title="Physical Fitness" src="https://s3.amazonaws.com/tsresources.targetsolutions.com/982851D1-BB36-503C-EE59-43F5A3BE1DED.png" alt="Physical Fitness">
@@ -172,7 +181,7 @@
     <script>
         const videos = [
             'https://www.youtube.com/embed/jy9yQvJ6I_k?cc_load_policy=1',
-            // Replace 'video2' and 'video3' with actual video links
+            // Add more video links as needed
             'https://www.youtube.com/embed/ViRkH-42Ljw?cc_load_policy=1',
             'https://www.youtube.com/embed/uzWJngpIbRY?cc_load_policy=1',
             'https://www.youtube.com/embed/dC8dC8-ZAoU?cc_load_policy=1'
