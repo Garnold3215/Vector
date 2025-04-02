@@ -2,110 +2,63 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Larkspur Fire: Latest Facebook Post</title>
-
-  <!-- Ensure responsiveness on various screen sizes -->
+  <title>Larkspur Fire District Facebook Feed</title>
+  <!-- Make sure it looks good on mobile or TV screens -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Make the page fill the screen with no scroll if possible */
-    html, body {
+    /* Basic styling to demonstrate auto-resizing within a container */
+    body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #f0f0f0;
       font-family: Arial, sans-serif;
+      background: #f4f4f4;
     }
-
-    /* Container to center content and adjust spacing */
-    #latest-post-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;  /* vertically center */
-      align-items: center;      /* horizontally center */
-      width: 100%;
-      height: 100%;
+    .page-plugin-container {
+      max-width: 600px;  /* Example maximum width. Adjust as needed. */
+      margin: 3rem auto;
+      padding: 0 1rem;
       box-sizing: border-box;
-      padding: 1em;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    h1 {
       text-align: center;
-    }
-
-    /* Scales text relative to viewport width (vw) so it looks good on big screens */
-    #post-message {
-      font-size: 2vw; 
-      margin: 1em 0;
-      max-width: 80%;
-      line-height: 1.2em;
-      word-wrap: break-word;
-    }
-
-    /* Images shrink or grow to fit */
-    #post-image {
-      max-width: 80%;
-      height: auto;
-      border-radius: 5px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <div id="latest-post-container">
-    <!-- We'll inject the post's text and image here -->
-    <div id="post-message">Loading latest post...</div>
-    <img id="post-image" style="display:none;" alt="Post image" />
-  </div>
 
-  <script>
-    // Replace these with your page info and valid token:
-    const PAGE_ID = 'LARKSPURFIREDISTRICT'; // or the numeric page ID
-    const ACCESS_TOKEN = 'YOUR_PAGE_ACCESS_TOKEN'; // must have "pages_read_engagement" or similar
+<div class="page-plugin-container">
+  <h1>Larkspur Fire District</h1>
 
-    // Fields we want from each post: text, image, creation time, etc.
-    const FIELDS = 'message,full_picture,created_time';
+  <!-- Facebook SDK root element -->
+  <div id="fb-root"></div>
 
-    // Build URL to fetch only the LATEST post (limit=1)
-    const graphUrl = `https://graph.facebook.com/${PAGE_ID}/posts?fields=${FIELDS}&limit=1&access_token=${ACCESS_TOKEN}`;
-
-    async function loadLatestPost() {
-      try {
-        const response = await fetch(graphUrl);
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        if (data && data.data && data.data.length > 0) {
-          const latestPost = data.data[0];
-          displayPost(latestPost);
-        } else {
-          document.getElementById('post-message').textContent = 'No posts found.';
-        }
-      } catch (err) {
-        console.error('Error fetching latest post:', err);
-        document.getElementById('post-message').textContent = 'Error loading post.';
-      }
-    }
-
-    function displayPost(post) {
-      // If there's a message, show it; otherwise, say something like 'No text'
-      const message = post.message || '[No text content]';
-      const messageEl = document.getElementById('post-message');
-      messageEl.textContent = message;
-
-      // If there's an image, show it
-      if (post.full_picture) {
-        const imgEl = document.getElementById('post-image');
-        imgEl.src = post.full_picture;
-        imgEl.style.display = 'block';
-      }
-    }
-
-    // Load on page load
-    loadLatestPost();
-
-    // OPTIONAL: auto-refresh every X minutes to get the newest post
-    // setInterval(loadLatestPost, 5 * 60 * 1000); // every 5 minutes
+  <!-- Load Facebook's SDK for JavaScript (asynchronously) -->
+  <script async defer crossorigin="anonymous"
+    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
   </script>
+
+  <!-- Facebook Page Plugin code for Larkspur Fire District -->
+  <div class="fb-page"
+       data-href="https://www.facebook.com/LARKSPURFIREDISTRICT/"
+       data-tabs="timeline"
+       data-width=""                 <!-- Let it auto-adapt to container -->
+       data-height=""                <!-- Auto-height -->
+       data-adapt-container-width="true"
+       data-hide-cover="false"
+       data-show-facepile="true">
+    <blockquote cite="https://www.facebook.com/LARKSPURFIREDISTRICT/"
+                class="fb-xfbml-parse-ignore">
+      <a href="https://www.facebook.com/LARKSPURFIREDISTRICT/">
+        Larkspur Fire District
+      </a>
+    </blockquote>
+  </div>
+</div>
+
 </body>
 </html>
