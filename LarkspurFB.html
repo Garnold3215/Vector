@@ -3,20 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Larkspur Fire District Feed (Full Width)</title>
+  <!-- Ensures responsive scaling on phones, tablets, TVs, etc. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    /* Remove max-width so the plugin can fill the entire page (or parent) */
+    /* Remove default padding and margin so the page plugin can occupy the full width. */
     html, body {
       margin: 0;
       padding: 0;
+      background: #f4f4f4;
+      font-family: Arial, sans-serif;
     }
+
+    /* Container to hold the plugin. It's 100% width by default. */
     .page-plugin-container {
-      /* No max-width here */
       width: 100%;
       margin: 0 auto;
-      /* Optional: you can add padding or background if you like */
-      background: #f4f4f4;
+      box-sizing: border-box;
     }
+
     h1 {
       text-align: center;
       margin: 1rem 0;
@@ -24,20 +29,28 @@
   </style>
 </head>
 <body>
+
   <div class="page-plugin-container">
     <h1>Larkspur Fire District</h1>
+
+    <!-- The Facebook SDK root element -->
     <div id="fb-root"></div>
+
+    <!-- Load the Facebook SDK (asynchronously) -->
     <script async defer crossorigin="anonymous"
-      src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0"></script>
+      src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
+    </script>
+
+    <!-- The actual Page Plugin code -->
     <div class="fb-page"
          data-href="https://www.facebook.com/LARKSPURFIREDISTRICT/"
          data-tabs="timeline"
-         data-width=""
-         data-height=""
+         data-width=""                <!-- Blank so it adapts to container -->
+         data-height=""               <!-- Blank so it automatically sets a suitable height -->
          data-adapt-container-width="true"
          data-hide-cover="false"
          data-show-facepile="true">
-      <blockquote 
+      <blockquote
         cite="https://www.facebook.com/LARKSPURFIREDISTRICT/"
         class="fb-xfbml-parse-ignore">
         <a href="https://www.facebook.com/LARKSPURFIREDISTRICT/">
@@ -46,5 +59,6 @@
       </blockquote>
     </div>
   </div>
+
 </body>
 </html>
