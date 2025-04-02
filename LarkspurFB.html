@@ -2,63 +2,49 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Larkspur Fire District Facebook Feed</title>
-  <!-- Make sure it looks good on mobile or TV screens -->
+  <title>Larkspur Fire District Feed (Full Width)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
-    /* Basic styling to demonstrate auto-resizing within a container */
-    body {
+    /* Remove max-width so the plugin can fill the entire page (or parent) */
+    html, body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
     }
     .page-plugin-container {
-      max-width: 600px;  /* Example maximum width. Adjust as needed. */
-      margin: 3rem auto;
-      padding: 0 1rem;
-      box-sizing: border-box;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      /* No max-width here */
+      width: 100%;
+      margin: 0 auto;
+      /* Optional: you can add padding or background if you like */
+      background: #f4f4f4;
     }
     h1 {
       text-align: center;
-      margin-top: 1rem;
+      margin: 1rem 0;
     }
   </style>
 </head>
 <body>
-
-<div class="page-plugin-container">
-  <h1>Larkspur Fire District</h1>
-
-  <!-- Facebook SDK root element -->
-  <div id="fb-root"></div>
-
-  <!-- Load Facebook's SDK for JavaScript (asynchronously) -->
-  <script async defer crossorigin="anonymous"
-    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
-  </script>
-
-  <!-- Facebook Page Plugin code for Larkspur Fire District -->
-  <div class="fb-page"
-       data-href="https://www.facebook.com/LARKSPURFIREDISTRICT/"
-       data-tabs="timeline"
-       data-width=""                 <!-- Let it auto-adapt to container -->
-       data-height=""                <!-- Auto-height -->
-       data-adapt-container-width="true"
-       data-hide-cover="false"
-       data-show-facepile="true">
-    <blockquote cite="https://www.facebook.com/LARKSPURFIREDISTRICT/"
-                class="fb-xfbml-parse-ignore">
-      <a href="https://www.facebook.com/LARKSPURFIREDISTRICT/">
-        Larkspur Fire District
-      </a>
-    </blockquote>
+  <div class="page-plugin-container">
+    <h1>Larkspur Fire District</h1>
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous"
+      src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0"></script>
+    <div class="fb-page"
+         data-href="https://www.facebook.com/LARKSPURFIREDISTRICT/"
+         data-tabs="timeline"
+         data-width=""
+         data-height=""
+         data-adapt-container-width="true"
+         data-hide-cover="false"
+         data-show-facepile="true">
+      <blockquote 
+        cite="https://www.facebook.com/LARKSPURFIREDISTRICT/"
+        class="fb-xfbml-parse-ignore">
+        <a href="https://www.facebook.com/LARKSPURFIREDISTRICT/">
+          Larkspur Fire District
+        </a>
+      </blockquote>
+    </div>
   </div>
-</div>
-
 </body>
 </html>
