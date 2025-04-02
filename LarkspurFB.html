@@ -2,63 +2,156 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Larkspur Fire District Feed (Full Width)</title>
-  <!-- Ensures responsive scaling on phones, tablets, TVs, etc. -->
+  <title>Larkspur Fire District (Custom Feed)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Remove default padding and margin so the page plugin can occupy the full width. */
+    /* Reset default margins/padding */
     html, body {
       margin: 0;
       padding: 0;
-      background: #f4f4f4;
       font-family: Arial, sans-serif;
+      background: #f4f4f4;
     }
-
-    /* Container to hold the plugin. It's 100% width by default. */
-    .page-plugin-container {
+    
+    /* Container that holds the posts */
+    #feed-container {
       width: 100%;
-      margin: 0 auto;
+      max-width: 1200px; /* optional max width */
+      margin: 2rem auto;
+      padding: 1rem;
       box-sizing: border-box;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
+    /* Heading at the top */
     h1 {
       text-align: center;
-      margin: 1rem 0;
+      margin-bottom: 1rem;
+    }
+
+    /* Each post is its own block */
+    .post {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    /* Date/time styling */
+    .post-date {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Post message text */
+    .post-message {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      white-space: pre-wrap; /* preserve line breaks if any */
+    }
+
+    /* Post image styling */
+    .post-image {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
   </style>
 </head>
 <body>
 
-  <div class="page-plugin-container">
-    <h1>Larkspur Fire District</h1>
-
-    <!-- The Facebook SDK root element -->
-    <div id="fb-root"></div>
-
-    <!-- Load the Facebook SDK (asynchronously) -->
-    <script async defer crossorigin="anonymous"
-      src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v16.0">
-    </script>
-
-    <!-- The actual Page Plugin code -->
-    <div class="fb-page"
-         data-href="https://www.facebook.com/LARKSPURFIREDISTRICT/"
-         data-tabs="timeline"
-         data-width=""                <!-- Blank so it adapts to container -->
-         data-height=""               <!-- Blank so it automatically sets a suitable height -->
-         data-adapt-container-width="true"
-         data-hide-cover="false"
-         data-show-facepile="true">
-      <blockquote
-        cite="https://www.facebook.com/LARKSPURFIREDISTRICT/"
-        class="fb-xfbml-parse-ignore">
-        <a href="https://www.facebook.com/LARKSPURFIREDISTRICT/">
-          Larkspur Fire District
-        </a>
-      </blockquote>
-    </div>
+  <div id="feed-container">
+    <h1>Larkspur Fire District - Latest Posts</h1>
+    <div id="posts"></div>
   </div>
+
+  <script>
+    /*********************************************/
+    /* 1. CONFIGURE THESE TWO CONSTANTS BELOW    */
+    /*********************************************/
+    const PAGE_ID = 'LARKSPURFIREDISTRICT';
+    const ACCESS_TOKEN = 'PASTE_YOUR_PAGE_ACCESS_TOKEN_HERE';
+
+    /* Number of recent posts to fetch */
+    const LIMIT = 5;
+
+    /* Fields you want from each post */
+    const FIELDS = 'message,full_picture,created_time';
+
+    /* 2. BUILD THE GRAPH API ENDPOINT */
+    const apiUrl = `https://graph.facebook.com/${PAGE_ID}/posts?` +
+                   `fields=${FIELDS}&limit=${LIMIT}&access_token=${ACCESS_TOKEN}`;
+
+    /*********************************************/
+    /* 3. FETCH THE POSTS FROM FACEBOOK          */
+    /*********************************************/
+    fetch(apiUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Network response was not ok. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data || !data.data) {
+          throw new Error('No posts found or invalid permissions/token.');
+        }
+        renderPosts(data.data);
+      })
+      .catch(error => {
+        console.error('Error fetching posts:', error);
+        document.getElementById('posts').innerHTML = `
+          <p style="color: red;">
+            Error loading feed. Check the console or verify your Page Token/permissions.
+          </p>`;
+      });
+
+    /*********************************************/
+    /* 4. RENDER THE POSTS IN OUR CUSTOM LAYOUT  */
+    /*********************************************/
+    function renderPosts(postsArray) {
+      const postsContainer = document.getElementById('posts');
+      postsContainer.innerHTML = ''; // Clear anything if it was there
+
+      // For each post object in the array
+      postsArray.forEach(post => {
+        // Create a container div for this post
+        const postEl = document.createElement('div');
+        postEl.className = 'post';
+
+        // Date/time
+        const dateEl = document.createElement('div');
+        dateEl.className = 'post-date';
+        // Convert the created_time to a user-friendly format
+        const postDate = new Date(post.created_time).toLocaleString();
+        dateEl.textContent = `Posted on: ${postDate}`;
+        postEl.appendChild(dateEl);
+
+        // Message
+        const messageEl = document.createElement('div');
+        messageEl.className = 'post-message';
+        messageEl.textContent = post.message || '[No message content]';
+        postEl.appendChild(messageEl);
+
+        // Full picture (if any)
+        if (post.full_picture) {
+          const imgEl = document.createElement('img');
+          imgEl.className = 'post-image';
+          imgEl.src = post.full_picture;
+          postEl.appendChild(imgEl);
+        }
+
+        // Append the post to the container
+        postsContainer.appendChild(postEl);
+      });
+    }
+  </script>
 
 </body>
 </html>
