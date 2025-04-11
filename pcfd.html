@@ -5,54 +5,34 @@
   <title>Palm Coast Weather</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Change this number to make the entire widget larger/smaller -->
   <style>
-    :root { --widget-scale: 1.6; }           /* 1 = 100 %, 1.6 ≈ 160 % */
-
-    /* full‑screen layout */
+    /* 1) full‑screen solid background (shows while widget loads) */
     html, body{
       margin:0;
       height:100%;
       width:100%;
-      background:#1f567c;                    /* shows while widget loads */
+      background:#1f567c;           /* adjust if you need a different colour */
       display:flex;
       justify-content:center;
-      align-items:center;
+      align-items:start;            /* top‑left anchor after scaling */
       overflow:hidden;
     }
 
-    /* wrapper just centres the iframe */
-    .widget-wrapper{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      width:100%;
-      height:100%;
+    /* 2) wrapper holds the widget at its natural size */
+    #widgetWrapper{
+      transform-origin:top left;    /* so scaling grows from (0,0) */
     }
 
-    /* ---------------------------------------------------------------
-       1) start smaller  (100 % / scale) 
-       2) scale up       (scale)
-       => net result = 100 % of screen, no clipping
-    ---------------------------------------------------------------- */
-    .widget-wrapper iframe{
-      width:calc(100% / var(--widget-scale));
-      height:calc(100% / var(--widget-scale));
-      transform:scale(var(--widget-scale));
-      transform-origin:top left;
-      border:0;
-    }
-
-    /* hide fallback anchor text */
+    /* 3) hide fallback anchor text */
     .weatherwidget-io{
       font-size:0; line-height:0; text-indent:-9999px;
-      display:block; width:100%; height:100%;
+      display:block;
     }
   </style>
 </head>
 <body>
 
-  <div class="widget-wrapper">
+  <div id="widgetWrapper">
     <a class="weatherwidget-io"
        href="https://forecast7.com/en/29d58n81d21/palm-coast/?unit=us"
        data-label_1="PALM&nbsp;COAST"
@@ -64,19 +44,52 @@
   </div>
 
   <script>
-    /* add the script once, then (re)initialise */
+    /* -----------------------------------------------------------
+       1.  Inject WeatherWidget.io (if not already present)
+       2.  After its <iframe> loads, compute the best scale and
+           apply it so nothing is clipped.
+    ----------------------------------------------------------- */
     (function(d,s,id){
-      const init = () => window.__weatherwidget_init?.();
-      const existing = d.getElementById(id);
+      const wrapper = d.getElementById('widgetWrapper');
 
-      if (existing){ init(); return; }
+      /* ---- step 2: measure + scale -------------------------------------- */
+      const fitWidget = () => {
+        const iframe = wrapper.querySelector('iframe');
+        if (!iframe) return;                     // still not there
+        const rect   = iframe.getBoundingClientRect();
+        const scale  = Math.min(
+          window.innerWidth  / rect.width,
+          window.innerHeight / rect.height
+        );
+        wrapper.style.transform = `scale(${scale})`;
+      };
 
-      const js  = d.createElement(s),
-            fjs = d.getElementsByTagName(s)[0];
-      js.id  = id;
-      js.src = 'https://weatherwidget.io/js/widget.min.js';
-      js.onload = init;
-      fjs.parentNode.insertBefore(js, fjs);
+      /* When the iframe appears, wait for its own load event */
+      const observeIframe = () => {
+        const iframe = wrapper.querySelector('iframe');
+        if (!iframe) return;
+        iframe.addEventListener('load', () => {
+          fitWidget();               // first fit
+          window.addEventListener('resize', fitWidget);  // re‑fit on rotate
+        });
+      };
+
+      /* ---- step 1: add or reuse script ---------------------------------- */
+      const init = () => {
+        window.__weatherwidget_init?.();   // turn <a> into widget
+        observeIframe();
+      };
+
+      if (d.getElementById(id)) {          // script already in this tab
+        init();
+      } else {
+        const js  = d.createElement(s),
+              fjs = d.getElementsByTagName(s)[0];
+        js.id  = id;
+        js.src = 'https://weatherwidget.io/js/widget.min.js';
+        js.onload = init;
+        fjs.parentNode.insertBefore(js, fjs);
+      }
     })(document,'script','weatherwidget-io-js');
   </script>
 
