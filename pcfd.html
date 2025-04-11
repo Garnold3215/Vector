@@ -6,24 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* 1) full‑screen solid background (shows while widget loads) */
+    /* full‑screen solid background */
     html, body{
       margin:0;
       height:100%;
       width:100%;
-      background:#1f567c;           /* adjust if you need a different colour */
+      background:#1f567c;          /* shows while widget loads */
       display:flex;
-      justify-content:center;
-      align-items:start;            /* top‑left anchor after scaling */
+      justify-content:flex-start;  /* anchor at top‑left after scaling */
+      align-items:flex-start;
       overflow:hidden;
     }
 
-    /* 2) wrapper holds the widget at its natural size */
+    /* wrapper starts at natural widget size */
     #widgetWrapper{
-      transform-origin:top left;    /* so scaling grows from (0,0) */
+      transform-origin:top left;   /* scale grows from (0,0) */
     }
 
-    /* 3) hide fallback anchor text */
+    /* hide fallback anchor text */
     .weatherwidget-io{
       font-size:0; line-height:0; text-indent:-9999px;
       display:block;
@@ -44,44 +44,37 @@
   </div>
 
   <script>
-    /* -----------------------------------------------------------
-       1.  Inject WeatherWidget.io (if not already present)
-       2.  After its <iframe> loads, compute the best scale and
-           apply it so nothing is clipped.
-    ----------------------------------------------------------- */
     (function(d,s,id){
       const wrapper = d.getElementById('widgetWrapper');
 
-      /* ---- step 2: measure + scale -------------------------------------- */
-      const fitWidget = () => {
+      /* ——— resize helper ——— */
+      const fit = () => {
         const iframe = wrapper.querySelector('iframe');
-        if (!iframe) return;                     // still not there
-        const rect   = iframe.getBoundingClientRect();
-        const scale  = Math.min(
+        if (!iframe) return;
+        const rect  = iframe.getBoundingClientRect();
+        const scale = Math.min(
           window.innerWidth  / rect.width,
           window.innerHeight / rect.height
         );
         wrapper.style.transform = `scale(${scale})`;
       };
 
-      /* When the iframe appears, wait for its own load event */
-      const observeIframe = () => {
+      /* ——— watch for the iframe insertion ——— */
+      const obs = new MutationObserver(() => {
         const iframe = wrapper.querySelector('iframe');
         if (!iframe) return;
         iframe.addEventListener('load', () => {
-          fitWidget();               // first fit
-          window.addEventListener('resize', fitWidget);  // re‑fit on rotate
+          fit();                               // first fit
+          window.addEventListener('resize', fit);
         });
-      };
+        obs.disconnect();                      // done watching
+      });
+      obs.observe(wrapper, { childList:true });
 
-      /* ---- step 1: add or reuse script ---------------------------------- */
-      const init = () => {
-        window.__weatherwidget_init?.();   // turn <a> into widget
-        observeIframe();
-      };
-
-      if (d.getElementById(id)) {          // script already in this tab
-        init();
+      /* ——— add / reuse weatherwidget script ——— */
+      const init = () => window.__weatherwidget_init?.();
+      if (d.getElementById(id)){
+        init();                                // script already present
       } else {
         const js  = d.createElement(s),
               fjs = d.getElementsByTagName(s)[0];
