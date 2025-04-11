@@ -6,28 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Full‑screen layout with solid background (shown while loading) */
+    /* Solid background fills the screen while the widget downloads */
     html, body{
       margin:0;
       height:100%;
       width:100%;
-      background:#1f567c;          /* change if you prefer another colour */
+      background:#1f567c;           /* change to any colour you like */
       display:flex;
-      justify-content:flex-start;  /* top‑left anchor after scaling */
+      justify-content:flex-start;   /* top‑left anchor after scaling */
       align-items:flex-start;
       overflow:hidden;
     }
 
-    /* Wrapper that will be scaled after we know widget size */
+    /* Wrapper will be resized with transform: scale() */
     #widgetWrapper{
-      transform-origin:top left;    /* grow from (0,0) */
+      transform-origin:top left;
     }
 
-    /* Make the anchor fill its container but hide the fallback text */
+    /* Hide the fallback anchor text but DON’T force a height */
     .weatherwidget-io{
       display:block;
-      width:100%;
-      height:100%;
       font-size:0;
       line-height:0;
       text-indent:-9999px;
@@ -51,35 +49,35 @@
     (function(d,s,id){
       const wrapper = d.getElementById('widgetWrapper');
 
-      /* ---- Helper: scale wrapper so widget fills the screen without clipping */
-      const fit = () => {
+      /* Fit the widget so nothing is clipped */
+      function fit() {
         const iframe = wrapper.querySelector('iframe');
-        if (!iframe) return;                             // not ready yet
+        if (!iframe) return;                       // not inserted yet
         const r = iframe.getBoundingClientRect();
-        if (!r.width || !r.height) return;               // zero‑sized? wait…
+        if (!r.width || !r.height) return;         // still zero‑sized
         const scale = Math.min(
           window.innerWidth  / r.width,
           window.innerHeight / r.height
         );
         wrapper.style.transform = `scale(${scale})`;
-      };
+      }
 
-      /* ---- Watch for the iframe to appear, then fit and refit on resize ---- */
+      /* Watch for the iframe to appear, then fit & refit on resize */
       const obs = new MutationObserver(() => {
         const iframe = wrapper.querySelector('iframe');
         if (!iframe) return;
         iframe.addEventListener('load', () => {
-          fit();                        // first fit after widget loads
+          fit();                       // first fit
           window.addEventListener('resize', fit);
         });
-        obs.disconnect();               // we’re done observing
+        obs.disconnect();              // stop watching
       });
       obs.observe(wrapper, { childList:true });
 
-      /* ---- Load (or reuse) the WeatherWidget script and initialise ---- */
+      /* Load (or reuse) the WeatherWidget script, then initialise */
       const init = () => window.__weatherwidget_init?.();
-      if (d.getElementById(id)){
-        init();                         // script already in this tab
+      if (d.getElementById(id)) {
+        init();                        // script already present
       } else {
         const js  = d.createElement(s),
               fjs = d.getElementsByTagName(s)[0];
