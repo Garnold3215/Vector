@@ -6,32 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Full‑screen blue background */
-    html, body{
-      margin:0;
-      height:100%;
-      width:100%;
-      background:#1f567c;          /* your blue */
-      display:flex;                /* centre widget both ways */
-      justify-content:center;
-      align-items:center;
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #1f567c;          /* updated blue */
     }
 
-    /* Make the widget’s box follow the iframe size */
-    .weatherwidget-io{
-      display:block;
-      width:100%;                  /* stretch to iframe width */
-      max-width:700px;             /* optional: cap at a nice size */
-      height:auto;
-      font-size:0;                 /* hide fallback text flash */
-      line-height:0;
-      text-indent:-9999px;
+    /* Widget container */
+    .weatherwidget-io {
+      width: 100%;
+      height: 100%;
+      display: block;
+
+      /* Hide the fallback text while the widget script loads */
+      font-size: 0;
+      line-height: 0;
+      text-indent: -9999px;
     }
   </style>
 </head>
 <body>
 
-  <!-- WeatherWidget.io embed -->
   <a class="weatherwidget-io"
      href="https://forecast7.com/en/29d58n81d21/palm-coast/?unit=us"
      data-label_1="PALM&nbsp;COAST"
@@ -42,14 +41,13 @@
   </a>
 
   <script>
-    /* Load WeatherWidget.io once, then initialise it */
     !function(d,s,id){
-      if (d.getElementById(id)){ window.__weatherwidget_init(); return; }
-      var js=d.createElement(s), fjs=d.getElementsByTagName(s)[0];
-      js.id=id;
-      js.src='https://weatherwidget.io/js/widget.min.js';
-      js.onload=window.__weatherwidget_init;
-      fjs.parentNode.insertBefore(js,fjs);
+        var js,fjs=d.getElementsByTagName(s)[0];
+        if(!d.getElementById(id)){
+            js=d.createElement(s); js.id=id;
+            js.src='https://weatherwidget.io/js/widget.min.js';
+            fjs.parentNode.insertBefore(js,fjs);
+        }
     }(document,'script','weatherwidget-io-js');
   </script>
 
