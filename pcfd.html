@@ -5,52 +5,45 @@
   <title>Palm Coast Weather</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- 🔧 Widget scale: raise or lower this number as before -->
+  <!-- Change this number to make the entire widget larger/smaller -->
   <style>
-    :root { --widget-scale: 1.6; }
+    :root { --widget-scale: 1.6; }           /* 1 = 100 %, 1.6 ≈ 160 % */
 
-    /* ===== Page & layout =================================================== */
+    /* full‑screen layout */
     html, body{
       margin:0;
       height:100%;
       width:100%;
-      background:#004a7f;          /* same blue as “original” theme header */
+      background:#1f567c;                    /* shows while widget loads */
       display:flex;
       justify-content:center;
       align-items:center;
       overflow:hidden;
-      font-family:system-ui, sans-serif;
     }
 
-    /* ===== Loader ========================================================= */
-    #loader{
-      position:absolute;
-      inset:0;                    /* cover the whole screen */
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      background:#004a7f;         /* match page background */
-      color:#fff;
-      font-size:2rem;
-      transition:opacity .4s ease;
-      z-index:10;
-    }
-    #loader.hidden{ opacity:0; pointer-events:none; }
-
-    /* ===== Widget wrapper & scaling ======================================= */
+    /* wrapper just centres the iframe */
     .widget-wrapper{
+      display:flex;
+      justify-content:center;
+      align-items:center;
       width:100%;
       height:100%;
-      overflow:hidden;
     }
+
+    /* ---------------------------------------------------------------
+       1) start smaller  (100 % / scale) 
+       2) scale up       (scale)
+       => net result = 100 % of screen, no clipping
+    ---------------------------------------------------------------- */
     .widget-wrapper iframe{
-      width:100%;
-      height:100%;
+      width:calc(100% / var(--widget-scale));
+      height:calc(100% / var(--widget-scale));
       transform:scale(var(--widget-scale));
       transform-origin:top left;
+      border:0;
     }
 
-    /* Hide fallback text */
+    /* hide fallback anchor text */
     .weatherwidget-io{
       font-size:0; line-height:0; text-indent:-9999px;
       display:block; width:100%; height:100%;
@@ -58,9 +51,6 @@
   </style>
 </head>
 <body>
-
-  <!-- Simple text loader (replace with your own spinner or logo if you like) -->
-  <div id="loader">Loading&nbsp;weather…</div>
 
   <div class="widget-wrapper">
     <a class="weatherwidget-io"
@@ -74,37 +64,20 @@
   </div>
 
   <script>
-    /* Inject the WeatherWidget script */
-    !function(d,s,id){
-      var js,fjs=d.getElementsByTagName(s)[0];
-      if(!d.getElementById(id)){
-        js=d.createElement(s); js.id=id;
-        js.src='https://weatherwidget.io/js/widget.min.js';
-        fjs.parentNode.insertBefore(js,fjs);
-      }
-    }(document,'script','weatherwidget-io-js');
+    /* add the script once, then (re)initialise */
+    (function(d,s,id){
+      const init = () => window.__weatherwidget_init?.();
+      const existing = d.getElementById(id);
 
-    /* -----------------------------------------------------------------------
-       Wait until the widget’s iframe appears and finishes loading,
-       then hide the loader and fade in the widget.
-    ----------------------------------------------------------------------- */
-    const loader   = document.getElementById('loader');
-    const wrapper  = document.querySelector('.widget-wrapper');
+      if (existing){ init(); return; }
 
-    const observer = new MutationObserver(() => {
-      const iframe = wrapper.querySelector('iframe');
-      if (!iframe) return;
-
-      /* once we’ve found the iframe, watch its load event */
-      iframe.addEventListener('load', () => {
-        loader.classList.add('hidden');   // fade out loader
-      });
-
-      observer.disconnect();              // stop observing further changes
-    });
-
-    /* Start watching the wrapper for the iframe insertion */
-    observer.observe(wrapper, { childList:true });
+      const js  = d.createElement(s),
+            fjs = d.getElementsByTagName(s)[0];
+      js.id  = id;
+      js.src = 'https://weatherwidget.io/js/widget.min.js';
+      js.onload = init;
+      fjs.parentNode.insertBefore(js, fjs);
+    })(document,'script','weatherwidget-io-js');
   </script>
 
 </body>
