@@ -6,87 +6,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* Solid background fills the screen while the widget downloads */
+    /* Full‑screen blue background */
     html, body{
       margin:0;
       height:100%;
       width:100%;
-      background:#1f567c;           /* change to any colour you like */
-      display:flex;
-      justify-content:flex-start;   /* top‑left anchor after scaling */
-      align-items:flex-start;
-      overflow:hidden;
+      background:#1f567c;          /* your blue */
+      display:flex;                /* center the widget */
+      justify-content:center;
+      align-items:center;
     }
 
-    /* Wrapper will be resized with transform: scale() */
-    #widgetWrapper{
-      transform-origin:top left;
-    }
-
-    /* Hide the fallback anchor text but DON’T force a height */
+    /* Hide the fallback text that shows for a split‑second */
     .weatherwidget-io{
-      display:block;
       font-size:0;
       line-height:0;
       text-indent:-9999px;
+      display:block;
     }
   </style>
 </head>
 <body>
 
-  <div id="widgetWrapper">
-    <a class="weatherwidget-io"
-       href="https://forecast7.com/en/29d58n81d21/palm-coast/?unit=us"
-       data-label_1="PALM&nbsp;COAST"
-       data-label_2="WEATHER"
-       data-icons="Climacons Animated"
-       data-theme="original">
-       PALM&nbsp;COAST&nbsp;WEATHER
-    </a>
-  </div>
+  <!-- WeatherWidget.io embed (default size) -->
+  <a class="weatherwidget-io"
+     href="https://forecast7.com/en/29d58n81d21/palm-coast/?unit=us"
+     data-label_1="PALM&nbsp;COAST"
+     data-label_2="WEATHER"
+     data-icons="Climacons Animated"
+     data-theme="original">
+     PALM&nbsp;COAST&nbsp;WEATHER
+  </a>
 
   <script>
-    (function(d,s,id){
-      const wrapper = d.getElementById('widgetWrapper');
-
-      /* Fit the widget so nothing is clipped */
-      function fit() {
-        const iframe = wrapper.querySelector('iframe');
-        if (!iframe) return;                       // not inserted yet
-        const r = iframe.getBoundingClientRect();
-        if (!r.width || !r.height) return;         // still zero‑sized
-        const scale = Math.min(
-          window.innerWidth  / r.width,
-          window.innerHeight / r.height
-        );
-        wrapper.style.transform = `scale(${scale})`;
-      }
-
-      /* Watch for the iframe to appear, then fit & refit on resize */
-      const obs = new MutationObserver(() => {
-        const iframe = wrapper.querySelector('iframe');
-        if (!iframe) return;
-        iframe.addEventListener('load', () => {
-          fit();                       // first fit
-          window.addEventListener('resize', fit);
-        });
-        obs.disconnect();              // stop watching
-      });
-      obs.observe(wrapper, { childList:true });
-
-      /* Load (or reuse) the WeatherWidget script, then initialise */
-      const init = () => window.__weatherwidget_init?.();
-      if (d.getElementById(id)) {
-        init();                        // script already present
-      } else {
-        const js  = d.createElement(s),
-              fjs = d.getElementsByTagName(s)[0];
-        js.id  = id;
-        js.src = 'https://weatherwidget.io/js/widget.min.js';
-        js.onload = init;
-        fjs.parentNode.insertBefore(js, fjs);
-      }
-    })(document,'script','weatherwidget-io-js');
+    /* Load WeatherWidget.io once, then initialise */
+    !function(d,s,id){
+      if (d.getElementById(id)) { window.__weatherwidget_init(); return; }
+      var js=d.createElement(s), fjs=d.getElementsByTagName(s)[0];
+      js.id=id;
+      js.src='https://weatherwidget.io/js/widget.min.js';
+      js.onload=window.__weatherwidget_init;
+      fjs.parentNode.insertBefore(js,fjs);
+    }(document,'script','weatherwidget-io-js');
   </script>
 
 </body>
