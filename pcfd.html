@@ -13,7 +13,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #1f567c;          /* updated blue */
+      background: #ffffff;
     }
 
     /* Widget container */
@@ -22,10 +22,10 @@
       height: 100%;
       display: block;
 
-      /* Hide the fallback text while the widget script loads */
-      font-size: 0;
+      /* ↓ Hide the fallback text while the widget script loads */
+      font-size: 0;      /* no visible text */
       line-height: 0;
-      text-indent: -9999px;
+      text-indent: -9999px;  /* pushes any residual text off‑screen */
     }
   </style>
 </head>
@@ -44,7 +44,7 @@
     !function(d,s,id){
         var js,fjs=d.getElementsByTagName(s)[0];
         if(!d.getElementById(id)){
-            js=d.createElement(s); js.id=id;
+            js=d.createElement(s);js.id=id;
             js.src='https://weatherwidget.io/js/widget.min.js';
             fjs.parentNode.insertBefore(js,fjs);
         }
