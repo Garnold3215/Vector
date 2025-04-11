@@ -1,4 +1,54 @@
-<a class="weatherwidget-io" href="https://forecast7.com/en/29d58n81d21/palm-coast/?unit=us" data-label_1="PALM COAST" data-label_2="WEATHER" data-icons="Climacons Animated" data-theme="original" >PALM COAST WEATHER</a>
-<script>
-!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Palm Coast Weather</title>
+
+  <!-- Make the page take up the full viewport on any device -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    /* Remove default spacing and make everything flex‑centered */
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;          /* optional: pick any background */
+    }
+
+    /* Ensure the widget always stretches to the iframe / screen size */
+    .weatherwidget-io {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WeatherWidget.io embed -->
+  <a class="weatherwidget-io"
+     href="https://forecast7.com/en/29d58n81d21/palm-coast/?unit=us"
+     data-label_1="PALM&nbsp;COAST"
+     data-label_2="WEATHER"
+     data-icons="Climacons Animated"
+     data-theme="original">
+     PALM&nbsp;COAST&nbsp;WEATHER
+  </a>
+
+  <script>
+    !function(d,s,id){
+        var js,fjs=d.getElementsByTagName(s)[0];
+        if(!d.getElementById(id)){
+            js=d.createElement(s);js.id=id;
+            js.src='https://weatherwidget.io/js/widget.min.js';
+            fjs.parentNode.insertBefore(js,fjs);
+        }
+    }(document,'script','weatherwidget-io-js');
+  </script>
+
+</body>
+</html>
