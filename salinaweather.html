@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Salina, KS Radar</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style type="text/css">
+        li {
+            list-style: none;
+            display: inline-block;
+        }
+        /* Hide the controls */
+        #settings {
+            display: none;
+        }
+        /* Full‑screen map */
+        #mapid {
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 0; right: 0;
+        }
+        /* Timestamp overlay */
+        #timestamp {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            text-align: center;
+            padding: 8px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="timestamp">Loading…</div>
+<div id="mapid"></div>
+
+<script>
+    // Center on Salina, KS (38.84 N, –97.61 W)
+    var map = L.map('mapid').setView([38.84, -97.61], 10);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    var apiData = {}, mapFrames = [], radarLayers = [], animationPosition = 0;
+    var optionKind = 'radar', optionTileSize = 256, optionColorScheme = 4,
+        optionSmoothData = 1, optionSnowColors = 1, optionExtension = 'webp';
+    var loadingTilesCount = 0, loadedTilesCount = 0, animationTimer = false;
+
+    function startLoadingTile(){ loadingTilesCount++; }
+    function finishLoadingTile(){ setTimeout(()=>{ loadedTilesCount++; },250); }
+    function isTilesLoading(){ return loadingTilesCount > loadedTilesCount; }
+
+    function initialize(api, kind) {
+        radarLayers.forEach(layer => map.removeLayer(layer));
+        mapFrames = []; radarLayers = []; animationPosition = 0;
+        if (!api) return;
+        if (kind==='satellite' && api.satellite?.infrared) {
+            mapFrames = api.satellite.infrared;
+        } else if (api.radar?.past) {
+            mapFrames = api.radar.past.concat(api.radar.nowcast||[]);
+        }
+        showFrame(mapFrames.length-1, true);
+    }
+
+    function addLayer(frame) {
+        if (!radarLayers[frame.path]) {
+            var c = optionKind==='satellite' ? (optionColorScheme==255?255:0) : optionColorScheme;
+            var s = optionKind==='satellite'?0:optionSmoothData;
+            var w = optionKind==='satellite'?0:optionSnowColors;
+            var url = apiData.host + frame.path + '/' + optionTileSize +
+                      '/{z}/{x}/{y}/' + c + '/' + s+'_'+w+'.'+optionExtension;
+            var layer = L.tileLayer(url, { tileSize:256, opacity:0.01, zIndex:frame.time });
+            layer.on('loading', startLoadingTile)
+                 .on('load', finishLoadingTile)
+                 .on('remove', finishLoadingTile);
+            radarLayers[frame.path] = layer;
+        }
+        if (!map.hasLayer(radarLayers[frame.path])) {
+            map.addLayer(radarLayers[frame.path]);
+        }
+    }
+
+    function changeRadarPosition(pos, preloadOnly, force) {
+        pos = (pos % mapFrames.length + mapFrames.length) % mapFrames.length;
+        var curr = mapFrames[animationPosition], next = mapFrames[pos];
+        addLayer(next);
+        if (preloadOnly || (isTilesLoading() && !force)) return;
+        animationPosition = pos;
+        radarLayers[curr.path]?.setOpacity(0);
+        radarLayers[next.path].setOpacity(1.0);
+        var label = next.time > Date.now()/1000 ? 'FORECAST' : 'PAST';
+        document.getElementById('timestamp').innerText =
+          label + ': ' + new Date(next.time*1000).toLocaleString();
+    }
+
+    function showFrame(n, force) {
+        changeRadarPosition(n, false, force);
+        changeRadarPosition(n + (n>animationPosition?1:-1), true);
+    }
+    function stop(){ if(animationTimer){ clearTimeout(animationTimer); animationTimer=false; return true;} return false; }
+    function play(){ showFrame(animationPosition+1); animationTimer=setTimeout(play,500); }
+    function playStop(){ if(!stop()) play(); }
+
+    // fetch frames
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+      .then(r=>r.json())
+      .then(data=>{ apiData=data; initialize(data,optionKind); play(); });
+
+    // allow left/right arrow to step frames
+    document.addEventListener('keydown', e=>{
+      if (e.key==='ArrowLeft'){ stop(); showFrame(animationPosition-1,true); }
+      if (e.key==='ArrowRight'){ stop(); showFrame(animationPosition+1,true); }
+    });
+</script>
+
+</body>
+</html>
