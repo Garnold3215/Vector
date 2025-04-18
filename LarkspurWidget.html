@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />  
+  <title>Larkspur Weather</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #1f567c; /* your background color */
+    }
+
+    /* Widget container */
+    .weatherwidget-io {
+      width: 100%;
+      height: 100%;
+      display: block;
+      font-size: 0;
+      line-height: 0;
+      text-indent: -9999px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- UPDATED WIDGET -->
+  <a class="weatherwidget-io"
+     href="https://forecast7.com/en/39d23n104d89/larkspur/?unit=us"
+     data-theme="dark">
+     Larkspur, Colorado, USA
+  </a>
+  <script>
+    !function(d,s,id){
+      var js,fjs=d.getElementsByTagName(s)[0];
+      if(!d.getElementById(id)){
+        js=d.createElement(s);js.id=id;
+        js.src='https://weatherwidget.io/js/widget.min.js';
+        fjs.parentNode.insertBefore(js,fjs);
+      }
+    }(document,'script','weatherwidget-io-js');
+  </script>
+
+</body>
+</html>
