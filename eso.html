@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Responsive Dropbox Image</title>
+  <title>Force Fresh Dropbox Image</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <style>
     html, body {
       margin: 0;
@@ -23,6 +26,9 @@
   </style>
 </head>
 <body>
-  <img src="https://dl.dropboxusercontent.com/scl/fi/7nl3r4834vxrm4y9h0nxf/dashboard.png?rlkey=jvm9ocpq5bix4ss2ejwu6fytk&st=qc763tmb" alt="Dashboard Image">
+  <img id="dynamicImg" src="https://dl.dropboxusercontent.com/scl/fi/7nl3r4834vxrm4y9h0nxf/dashboard.png?rlkey=jvm9ocpq5bix4ss2ejwu6fytk&st=qc763tmb&t=" alt="Dashboard Image">
+  <script>
+    document.getElementById('dynamicImg').src += Date.now();
+  </script>
 </body>
 </html>
