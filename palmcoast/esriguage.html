@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Force Fresh Dropbox Image</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #fff;
+    }
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 100vh;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <img
+    id="dynamicImg"
+    src="https://dl.dropboxusercontent.com/scl/fi/r7xakza5um4ow1wjwsoba/dashboard2.png?rlkey=pf5yjd2uo1503csf6nqxh9joe&st=y437h2el&t="
+    alt="Dashboard 2">
+  <script>
+    // Append a timestamp to force reload on each view
+    document.getElementById('dynamicImg').src += Date.now();
+  </script>
+</body>
+</html>
