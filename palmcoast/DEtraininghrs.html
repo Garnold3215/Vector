@@ -8,20 +8,24 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <style>
+    /* Make the document itself stretch to the iframe’s size */
     html, body {
+      width: 100%;
+      height: 100%;
       margin: 0;
       padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background: #fff;        /* Change to “transparent” or any color */
+      background: #fff;           /* change to “transparent” or any color */
+      overflow: hidden;           /* no scrollbars */
+      display: flex;              /* center the image neatly */
+      align-items: center;
+      justify-content: center;
     }
+    /* Image scales to fill both axes while preserving aspect ratio */
     img {
-      display: block;
       width: 100%;
-      height: auto;
-      max-height: 100vh;
-      object-fit: contain;
+      height: 100%;
+      object-fit: contain;        /* ‘cover’ if you’d rather crop instead */
+      object-position: center;
     }
   </style>
 </head>
@@ -31,7 +35,7 @@
     src="https://dl.dropboxusercontent.com/scl/fi/osjlc1ytdjq221n7w67gt/DE-DB.png?rlkey=ubvttwuqzkhx5f5wnfdt1tqb0&st=rxp51053&t="
     alt="DE‑DB Dashboard" />
   <script>
-    /* Append a timestamp so the browser always fetches the latest copy */
+    /* Force a fresh download every time the page loads */
     document.getElementById('dynamicImg').src += Date.now();
   </script>
 </body>
