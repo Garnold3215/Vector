@@ -1,38 +1,27 @@
-<!DOCTYPE html>
+<iframe
+  style="width:100%; height:100%; border:none;"
+  loading="lazy"
+  srcdoc='<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Force Fresh Dropbox Image</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      background: #fff;        /* Change to “transparent” or any color */
-    }
-    img {
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: 100vh;
-      object-fit: contain;
-    }
+    html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#fff}
+    img{display:block;width:100%;height:auto;max-height:100vh;object-fit:contain}
   </style>
 </head>
 <body>
-  <img
-    id="dynamicImg"
-    src="https://dl.dropboxusercontent.com/scl/fi/wmce94m4cl7e5rsyqpa5l/FF-DB.png?rlkey=z9nh2wr7ade5292xndiyfqmy4&st=l10la307&t="
-    alt="FF‑DB Dashboard" />
+  <img id="dynamicImg"
+       src="https://dl.dropboxusercontent.com/scl/fi/wmce94m4cl7e5rsyqpa5l/FF-DB.png?rlkey=z9nh2wr7ade5292xndiyfqmy4&amp;st=l10la307&amp;t="
+       alt="FF‑DB Dashboard">
   <script>
-    /* Append a timestamp so the browser always fetches the latest copy */
-    document.getElementById('dynamicImg').src += Date.now();
+    /* Cache‑bust: append timestamp on every load */
+    document.getElementById(\"dynamicImg\").src += Date.now();
   </script>
 </body>
-</html>
+</html>'>
+</iframe>
