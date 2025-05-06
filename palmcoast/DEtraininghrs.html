@@ -1,42 +1,28 @@
-<!DOCTYPE html>
+<iframe
+  style="width:100%; height:100%; border:none;"
+  loading="lazy"
+  srcdoc='<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Force Fresh Dropbox Image</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <style>
-    /* Make the document itself stretch to the iframe’s size */
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: #fff;           /* change to “transparent” or any color */
-      overflow: hidden;           /* no scrollbars */
-      display: flex;              /* center the image neatly */
-      align-items: center;
-      justify-content: center;
-    }
-    /* Image scales to fill both axes while preserving aspect ratio */
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;        /* ‘cover’ if you’d rather crop instead */
-      object-position: center;
-    }
+    html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#fff;
+      display:flex;align-items:center;justify-content:center}
+    img{width:100%;height:100%;object-fit:contain;object-position:center}
   </style>
 </head>
 <body>
-  <img
-    id="dynamicImg"
-    src="https://dl.dropboxusercontent.com/scl/fi/osjlc1ytdjq221n7w67gt/DE-DB.png?rlkey=ubvttwuqzkhx5f5wnfdt1tqb0&st=rxp51053&t="
-    alt="DE‑DB Dashboard" />
+  <img id="dynamicImg"
+       src="https://dl.dropboxusercontent.com/scl/fi/osjlc1ytdjq221n7w67gt/DE-DB.png?rlkey=ubvttwuqzkhx5f5wnfdt1tqb0&amp;st=rxp51053&amp;t="
+       alt="DE‑DB Dashboard">
   <script>
-    /* Force a fresh download every time the page loads */
-    document.getElementById('dynamicImg').src += Date.now();
+    /* cache‑bust */
+    document.getElementById("dynamicImg").src += Date.now();
   </script>
 </body>
-</html>
+</html>'>
+</iframe>
