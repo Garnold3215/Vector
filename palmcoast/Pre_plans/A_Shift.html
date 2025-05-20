@@ -1,19 +1,19 @@
 <iframe
+  style="width:100%;height:100%;border:none"
   loading="lazy"
-  style="position:fixed; inset:0; width:100vw; height:100vh; border:none;"
   srcdoc='<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <style>
-  html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#fff}
-  img{width:100%;height:100%;object-fit:contain;object-position:center}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+            display:flex;align-items:center;justify-content:center;background:#fff}
+  img{width:100%;height:100%;object-fit:contain}
 </style>
-</head>
-<body>
-<img id="dyn" src="https://dl.dropboxusercontent.com/scl/fi/pvovvknshqvfztjcyb7mp/A_Shift.png?rlkey=mdooqsc4vvrm5wkpgqhvzo2v5&amp;st=ktq9whm3&amp;t=" alt="A-Shift Dashboard">
-<script>document.getElementById("dyn").src+=Date.now();</script>
-</body>
-</html>'>
+</head><body>
+<img id="dash"
+     src="https://dl.dropboxusercontent.com/scl/fi/kjrvqpllncvnb6tckwtgv/A_Shift.png?rlkey=mwqj891nkvu27f9qul7uskqys&raw=1&t="
+     alt="A-Shift Dashboard">
+<script>document.getElementById("dash").src += Date.now();</script>
+</body></html>'>
 </iframe>
