@@ -10,6 +10,7 @@
   <style>
     html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
+
     .badge {
       position: absolute;
       left: 10px;
@@ -20,99 +21,281 @@
       border-radius: 8px;
       font: 12px/1.2 Arial, sans-serif;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      user-select: none;
     }
+
+    .controls {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: rgba(255,255,255,0.92);
+      padding: 6px 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      font: 12px/1.2 Arial, sans-serif;
+      user-select: none;
+    }
+
+    .btn {
+      border: 1px solid rgba(0,0,0,0.2);
+      background: white;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #bbb;
+      display: inline-block;
+    }
+    .dot.playing { background: #2ecc71; }
+    .dot.paused { background: #e67e22; }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
   <div class="badge" id="badge">Loading radar…</div>
+
+  <div class="controls">
+    <span class="dot paused" id="stateDot" title="Paused"></span>
+    <button class="btn" id="playPauseBtn">Play</button>
+    <button class="btn" id="prevBtn">◀</button>
+    <button class="btn" id="nextBtn">▶</button>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <script>
+    // --- Settings ---
     const CENTER = [29.5845, -81.2079];     // Palm Coast
-    const START_ZOOM = 7;                   // IMPORTANT: radar tiles max out at z=7
+    const START_ZOOM = 7;                   // radar tiles max out at z=7 (maxNativeZoom handles higher map zoom)
     const FRAME_DELAY_MS = 900;             // animation speed
     const RADAR_OPACITY = 0.70;
 
+    // Crossfade (prevents flicker vs setUrl/redraw on the same layer)
+    const FADE_MS = 350;                    // fade duration
+    const FADE_STEPS = 10;                  // higher = smoother fade
+
+    // Refresh frames occasionally so it stays "live"
+    const REFRESH_FRAMES_EVERY_MS = 5 * 60 * 1000; // 5 minutes
+
+    // --- State ---
     let map;
-    let radarLayer;
+    let radarA, radarB;
+    let usingA = true;
     let frames = [];
     let frameIndex = 0;
     let timer = null;
     let host = "";
+    let lastFramesRefresh = 0;
 
     const badge = document.getElementById("badge");
-    const setBadge = (t) => badge.textContent = t;
+    const setBadge = (t) => (badge.textContent = t);
+
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const stateDot = document.getElementById("stateDot");
+
+    function setPlayingUI(isPlaying) {
+      if (isPlaying) {
+        playPauseBtn.textContent = "Pause";
+        stateDot.classList.remove("paused");
+        stateDot.classList.add("playing");
+        stateDot.title = "Playing";
+      } else {
+        playPauseBtn.textContent = "Play";
+        stateDot.classList.remove("playing");
+        stateDot.classList.add("paused");
+        stateDot.title = "Paused";
+      }
+    }
+
+    async function fetchJson(url, tries = 3) {
+      let lastErr;
+      for (let i = 0; i < tries; i++) {
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return await res.json();
+        } catch (e) {
+          lastErr = e;
+          await new Promise(r => setTimeout(r, 400 * (i + 1)));
+        }
+      }
+      throw lastErr;
+    }
 
     async function loadFrames() {
-      const res = await fetch("https://api.rainviewer.com/public/weather-maps.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("RainViewer API error: " + res.status);
-
-      const data = await res.json();
+      const data = await fetchJson("https://api.rainviewer.com/public/weather-maps.json", 3);
       host = data.host || "https://tilecache.rainviewer.com";
 
-      // Use past frames (last ~2 hours)
-      frames = (data?.radar?.past || []).map(f => ({ time: f.time, path: f.path })).filter(f => f.path);
+      // past frames (last ~2 hours). If you ever want "future/nowcast", RainViewer provides it in some regions,
+      // but keeping this simple + reliable.
+      const past = (data?.radar?.past || [])
+        .map(f => ({ time: f.time, path: f.path }))
+        .filter(f => f.path);
 
-      if (!frames.length) throw new Error("No radar frames returned");
+      if (!past.length) throw new Error("No radar frames returned");
+      frames = past;
+      lastFramesRefresh = Date.now();
     }
 
     function radarTileUrl(frame) {
-      // per RainViewer Weather Maps API: {host}{path}/{size}/{z}/{x}/{y}/{color}/{options}.png
-      // max zoom level for radar tiles is 7
+      // RainViewer Weather Maps API format:
+      // {host}{path}/256/{z}/{x}/{y}/2/1_1.png
       return `${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`;
     }
 
     function initMap() {
-      map = L.map("map").setView(CENTER, START_ZOOM);
+      map = L.map("map", { zoomControl: true }).setView(CENTER, START_ZOOM);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: ""
       }).addTo(map);
 
-      radarLayer = L.tileLayer(radarTileUrl(frames[0]), {
-        opacity: RADAR_OPACITY,
+      // Two radar layers for crossfading
+      radarA = L.tileLayer(radarTileUrl(frames[0]), {
+        opacity: 0,
         zIndex: 999,
         crossOrigin: true,
+        maxNativeZoom: 7,
+        maxZoom: 19
+      }).addTo(map);
 
-        // IMPORTANT: RainViewer radar tiles only exist up to z=7
+      radarB = L.tileLayer(radarTileUrl(frames[0]), {
+        opacity: 0,
+        zIndex: 999,
+        crossOrigin: true,
         maxNativeZoom: 7,
         maxZoom: 19
       }).addTo(map);
     }
 
+    function activeLayer() { return usingA ? radarA : radarB; }
+    function backLayer() { return usingA ? radarB : radarA; }
+
+    async function maybeRefreshFrames() {
+      const now = Date.now();
+      if (now - lastFramesRefresh < REFRESH_FRAMES_EVERY_MS) return;
+
+      try {
+        const beforeLatest = frames[frames.length - 1]?.time || 0;
+        await loadFrames();
+        const afterLatest = frames[frames.length - 1]?.time || 0;
+
+        // If new frames came in, jump to latest (keeps it feeling "live")
+        if (afterLatest > beforeLatest) {
+          frameIndex = frames.length - 1;
+        }
+      } catch (e) {
+        // Don't break playback if refresh fails—just keep existing frames.
+        console.warn("Frame refresh failed:", e);
+      }
+    }
+
+    function formatFrameTime(unixSeconds) {
+      const d = new Date(unixSeconds * 1000);
+      return d.toLocaleString();
+    }
+
+    function fadeToNewFrame(nextIndex) {
+      frameIndex = (nextIndex + frames.length) % frames.length;
+
+      const frame = frames[frameIndex];
+      const front = activeLayer();
+      const back = backLayer();
+
+      // Put the next tiles on the back layer at 0 opacity so the browser starts fetching them
+      back.setUrl(radarTileUrl(frame), true);
+      back.redraw();
+      back.setOpacity(0);
+
+      // Crossfade from front -> back
+      const steps = FADE_STEPS;
+      const stepMs = Math.max(16, Math.floor(FADE_MS / steps)); // clamp to ~60fps-ish
+      let s = 0;
+
+      const fadeTimer = setInterval(() => {
+        s++;
+        const t = s / steps;
+
+        // Back comes up to RADAR_OPACITY, front goes down to 0
+        back.setOpacity(RADAR_OPACITY * t);
+        front.setOpacity(RADAR_OPACITY * (1 - t));
+
+        if (s >= steps) {
+          clearInterval(fadeTimer);
+          // Swap which layer is "active"
+          usingA = !usingA;
+          // Ensure the new active is exactly RADAR_OPACITY
+          activeLayer().setOpacity(RADAR_OPACITY);
+          backLayer().setOpacity(0);
+        }
+      }, stepMs);
+
+      setBadge("Radar: " + formatFrameTime(frame.time));
+    }
+
     function showFrame(i) {
-      frameIndex = (i + frames.length) % frames.length;
-
-      radarLayer.setUrl(radarTileUrl(frames[frameIndex]), true);
-      radarLayer.redraw();
-
-      const d = new Date(frames[frameIndex].time * 1000);
-      setBadge("Radar: " + d.toLocaleString());
+      if (!frames.length) return;
+      fadeToNewFrame(i);
     }
 
     function play() {
       if (timer) return;
-      timer = setInterval(() => showFrame(frameIndex + 1), FRAME_DELAY_MS);
+      setPlayingUI(true);
+      timer = setInterval(async () => {
+        await maybeRefreshFrames();
+        showFrame(frameIndex + 1);
+      }, FRAME_DELAY_MS);
     }
 
     function stop() {
-      clearInterval(timer);
+      if (timer) clearInterval(timer);
       timer = null;
+      setPlayingUI(false);
     }
 
+    // Pause when tab hidden (prevents wasted CPU / keeps it smooth)
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stop();
       else play();
     });
 
+    // Simple controls
+    playPauseBtn.addEventListener("click", () => (timer ? stop() : play()));
+    prevBtn.addEventListener("click", () => { stop(); showFrame(frameIndex - 1); });
+    nextBtn.addEventListener("click", () => { stop(); showFrame(frameIndex + 1); });
+
     (async function boot() {
       try {
         await loadFrames();
         initMap();
-        showFrame(frames.length - 1); // start near latest
+
+        // Start at latest frame, fade in from empty
+        frameIndex = frames.length - 1;
+
+        // Force a first render (front layer fades in)
+        const first = frames[frameIndex];
+        radarA.setUrl(radarTileUrl(first), true);
+        radarA.redraw();
+        radarA.setOpacity(RADAR_OPACITY);
+        radarB.setOpacity(0);
+        usingA = true;
+
+        setBadge("Radar: " + formatFrameTime(first.time));
         play();
       } catch (e) {
         console.error(e);
