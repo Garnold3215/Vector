@@ -5,112 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Palm Coast Live Radar</title>
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
   <style>
-    html, body { margin: 0; height: 100%; }
+    html, body { height: 100%; margin: 0; }
     #map { height: 100%; width: 100%; }
-
-    /* small status badge (optional) */
     .badge {
       position: absolute;
-      top: 10px;
       left: 10px;
-      background: rgba(255,255,255,0.95);
-      padding: 8px 10px;
-      border-radius: 8px;
-      font: 13px/1.3 Arial, sans-serif;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      bottom: 10px;
       z-index: 1000;
+      background: rgba(255,255,255,0.92);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font: 12px/1.2 Arial, sans-serif;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
   </style>
 </head>
-
 <body>
   <div id="map"></div>
-  <div class="badge" id="status">Loading radar…</div>
+  <div class="badge" id="badge">Loading radar…</div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <script>
-    const CENTER = [29.5845, -81.2079];   // Palm Coast
-    const START_ZOOM = 9;                 // good default
+    const CENTER = [29.5845, -81.2079];     // Palm Coast
+    const START_ZOOM = 7;                   // IMPORTANT: radar tiles max out at z=7
+    const FRAME_DELAY_MS = 900;             // animation speed
     const RADAR_OPACITY = 0.70;
-    const FRAME_DELAY = 900;              // 900–1500 is a good range
 
     let map;
     let radarLayer;
     let frames = [];
     let frameIndex = 0;
     let timer = null;
+    let host = "";
 
-    const statusEl = document.getElementById("status");
-    const setStatus = (t) => statusEl.textContent = t;
+    const badge = document.getElementById("badge");
+    const setBadge = (t) => badge.textContent = t;
 
     async function loadFrames() {
       const res = await fetch("https://api.rainviewer.com/public/weather-maps.json", { cache: "no-store" });
       if (!res.ok) throw new Error("RainViewer API error: " + res.status);
-      const data = await res.json();
 
-      // Use BOTH past + nowcast if available for smoother animation
-      const past = (data?.radar?.past || []).map(f => f.time);
-      const nowcast = (data?.radar?.nowcast || []).map(f => f.time);
-      frames = [...past, ...nowcast].filter(Boolean);
+      const data = await res.json();
+      host = data.host || "https://tilecache.rainviewer.com";
+
+      // Use past frames (last ~2 hours)
+      frames = (data?.radar?.past || []).map(f => ({ time: f.time, path: f.path })).filter(f => f.path);
 
       if (!frames.length) throw new Error("No radar frames returned");
     }
 
-    function tileUrl(time) {
-      // cache-bust to force Leaflet to actually fetch the new tiles
-      return `https://tilecache.rainviewer.com/v2/radar/${time}/256/{z}/{x}/{y}/4/1_1.webp?ts=${time}`;
+    function radarTileUrl(frame) {
+      // per RainViewer Weather Maps API: {host}{path}/{size}/{z}/{x}/{y}/{color}/{options}.png
+      // max zoom level for radar tiles is 7
+      return `${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`;
     }
 
     function initMap() {
-      map = L.map("map", { zoomControl: true }).setView(CENTER, START_ZOOM);
+      map = L.map("map").setView(CENTER, START_ZOOM);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
-        attribution: "© OpenStreetMap"
+        attribution: ""
       }).addTo(map);
 
-      radarLayer = L.tileLayer(tileUrl(frames[0]), {
+      radarLayer = L.tileLayer(radarTileUrl(frames[0]), {
         opacity: RADAR_OPACITY,
-        zIndex: 1000,
+        zIndex: 999,
         crossOrigin: true,
-        updateWhenIdle: false,
-        updateWhenZooming: false,
-        keepBuffer: 2
+
+        // IMPORTANT: RainViewer radar tiles only exist up to z=7
+        maxNativeZoom: 7,
+        maxZoom: 19
       }).addTo(map);
     }
 
     function showFrame(i) {
       frameIndex = (i + frames.length) % frames.length;
-      const t = frames[frameIndex];
 
-      radarLayer.setUrl(tileUrl(t), false);
+      radarLayer.setUrl(radarTileUrl(frames[frameIndex]), true);
+      radarLayer.redraw();
 
-      const d = new Date(t * 1000);
-      setStatus("Radar: " + d.toLocaleString());
+      const d = new Date(frames[frameIndex].time * 1000);
+      setBadge("Radar: " + d.toLocaleString());
     }
 
     function play() {
       if (timer) return;
-      timer = setInterval(() => showFrame(frameIndex + 1), FRAME_DELAY);
+      timer = setInterval(() => showFrame(frameIndex + 1), FRAME_DELAY_MS);
     }
 
-    function pause() {
-      if (!timer) return;
+    function stop() {
       clearInterval(timer);
       timer = null;
     }
 
-    // pause when tab hidden, resume when visible
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) pause();
+      if (document.hidden) stop();
       else play();
     });
 
@@ -118,11 +112,11 @@
       try {
         await loadFrames();
         initMap();
-        showFrame(0);
+        showFrame(frames.length - 1); // start near latest
         play();
-      } catch (err) {
-        console.error(err);
-        setStatus("Error loading radar");
+      } catch (e) {
+        console.error(e);
+        setBadge("Radar error (check console)");
       }
     })();
   </script>
