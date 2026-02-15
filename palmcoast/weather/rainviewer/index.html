@@ -1,57 +1,157 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RainViewer Radar (GitHub Pages)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Palm Coast Live Radar</title>
 
-  <link rel="stylesheet" href="style.css" />
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  crossorigin=""
+/>
 
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+<style>
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+.control-bar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.control-bar button {
+  margin-right: 6px;
+}
+
+.status {
+  margin-top: 6px;
+  font-size: 12px;
+}
+</style>
 </head>
 
 <body>
-  <header class="bar">
-    <div class="title">RainViewer Radar</div>
 
-    <div class="controls">
-      <button id="btnPlay" type="button">Play</button>
-      <button id="btnPause" type="button">Pause</button>
+<div class="control-bar">
+  <button id="play">Play</button>
+  <button id="pause">Pause</button>
+  <div class="status" id="status">Loading radar...</div>
+</div>
 
-      <label class="label">
-        Speed
-        <select id="speed">
-          <option value="2000">2.0s</option>
-          <option value="1500">1.5s</option>
-          <option value="1200" selected>1.2s</option>
-          <option value="900">0.9s</option>
-        </select>
-      </label>
+<div id="map"></div>
 
-      <label class="label">
-        Opacity
-        <input id="opacity" type="range" min="0" max="1" step="0.05" value="0.70" />
-      </label>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  crossorigin=""
+></script>
 
-      <div id="status" class="status">Loading…</div>
-    </div>
-  </header>
+<script>
+const CENTER = [29.5845, -81.2079]; // Palm Coast
+const ZOOM = 9;
+const FRAME_DELAY = 1200; // Slower = less chance of 429
+const RADAR_OPACITY = 0.7;
 
-  <main id="map"></main>
+let map;
+let radarLayer;
+let frames = [];
+let frameIndex = 0;
+let timer = null;
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+function setStatus(text) {
+  document.getElementById("status").innerText = text;
+}
 
-  <script src="assets/app.js"></script>
+async function loadFrames() {
+  const res = await fetch("https://api.rainviewer.com/public/weather-maps.json", {
+    cache: "no-store"
+  });
+
+  if (!res.ok) {
+    throw new Error("RainViewer API error: " + res.status);
+  }
+
+  const data = await res.json();
+  frames = (data?.radar?.past || []).map(f => f.time);
+
+  if (!frames.length) {
+    throw new Error("No radar frames returned");
+  }
+}
+
+function tileUrl(time) {
+  return `https://tilecache.rainviewer.com/v2/radar/${time}/256/{z}/{x}/{y}/4/1_1.webp`;
+}
+
+function initMap() {
+  map = L.map("map").setView(CENTER, ZOOM);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19
+  }).addTo(map);
+
+  radarLayer = L.tileLayer(tileUrl(frames[0]), {
+    opacity: RADAR_OPACITY,
+    zIndex: 999,
+    crossOrigin: true
+  }).addTo(map);
+
+  setStatus("Radar loaded");
+}
+
+function showFrame(i) {
+  frameIndex = (i + frames.length) % frames.length;
+  radarLayer.setUrl(tileUrl(frames[frameIndex]), true);
+
+  const d = new Date(frames[frameIndex] * 1000);
+  setStatus("Frame: " + d.toLocaleString());
+}
+
+function play() {
+  if (timer) return;
+  timer = setInterval(() => {
+    showFrame(frameIndex + 1);
+  }, FRAME_DELAY);
+}
+
+function pause() {
+  clearInterval(timer);
+  timer = null;
+}
+
+document.getElementById("play").addEventListener("click", play);
+document.getElementById("pause").addEventListener("click", pause);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) pause();
+  else play();
+});
+
+(async function boot() {
+  try {
+    await loadFrames();
+    initMap();
+    play();
+  } catch (err) {
+    console.error(err);
+    setStatus("Error loading radar");
+  }
+})();
+</script>
+
 </body>
 </html>
